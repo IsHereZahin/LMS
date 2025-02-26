@@ -1,23 +1,97 @@
-import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
+import { createRouter, createWebHistory } from 'vue-router';
+import AdminLayout from '@/views/Layouts/AdminLayout.vue';
+import StudentLayout from '@/views/Layouts/StudentLayout.vue';
+import WebsiteLayout from '@/views/Layouts/WebsiteLayout.vue';
 
+// Routes
+const routes = [
+  {
+    path: '/',
+    component: WebsiteLayout,
+    children: [
+      {
+        path: '',
+        component: () => import('../views/Website/Index.vue'),
+      },
+    ],
+  },
+  {
+    path: '/course',
+    component: WebsiteLayout,
+    children: [
+      {
+        path: '',
+        component: () => import('../views/Website/Course.vue'),
+      },
+    ],
+  },
+
+  // Auth Routes
+  {
+    path: '/login',
+    component: () => import('../views/Auth/Login.vue'),
+  },
+  {
+    path: '/register',
+    component: () => import('../views/Auth/Register.vue'),
+  },
+
+  // Student Dashboard (Only accessible by students)
+  {
+    path: '/dashboard',
+    component: StudentLayout,
+    meta: { requiresAuth: true, role: 'student' },
+    children: [
+      {
+        path: '',
+        component: () => import('../views/Student/Dashboard.vue'),
+      },
+    ],
+  },
+
+  // Admin Dashboard (Only accessible by admins)
+  {
+    path: '/admin-dashboard',
+    component: AdminLayout,
+    meta: { requiresAuth: true, role: 'admin' },
+    children: [
+      {
+        path: '',
+        component: () => import('../views/Admin/Dashboard.vue'),
+      },
+    ],
+  },
+];
+
+// Create Router
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
-  routes: [
-    {
-      path: '/',
-      name: 'home',
-      component: HomeView,
-    },
-    {
-      path: '/about',
-      name: 'about',
-      // route level code-splitting
-      // this generates a separate chunk (About.[hash].js) for this route
-      // which is lazy-loaded when the route is visited.
-      component: () => import('../views/AboutView.vue'),
-    },
-  ],
-})
+  history: createWebHistory(),
+  routes,
+});
 
-export default router
+// Navigation Guard
+router.beforeEach((to, from, next) => {
+  const loggedIn = localStorage.getItem('token');
+  const role = localStorage.getItem('role');
+
+  // logged-in users can not access login and register pages
+  if (loggedIn && (to.path === '/login' || to.path === '/register')) {
+    next(role === 'admin' ? '/admin-dashboard' : '/dashboard');
+  }
+  // Restrict access based on user role
+  else if (to.path.startsWith('/admin-dashboard') && role !== 'admin') {
+    next('/dashboard');
+  }
+  else if (to.path.startsWith('/dashboard') && role !== 'student') {
+    next('/admin-dashboard');
+  }
+  // Protect all authenticated routes
+  else if (to.matched.some(record => record.meta.requiresAuth) && !loggedIn) {
+    next('/login');
+  }
+  else {
+    next();
+  }
+});
+
+export default router;
