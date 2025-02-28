@@ -1,97 +1,120 @@
-import { createRouter, createWebHistory } from 'vue-router';
-import AdminLayout from '@/views/Layouts/AdminLayout.vue';
-import StudentLayout from '@/views/Layouts/StudentLayout.vue';
-import WebsiteLayout from '@/views/Layouts/WebsiteLayout.vue';
+import { createRouter, createWebHistory } from "vue-router"
+import AdminLayout from "@/views/Layouts/AdminLayout.vue"
+import StudentLayout from "@/views/Layouts/StudentLayout.vue"
+import WebsiteLayout from "@/views/Layouts/WebsiteLayout.vue"
 
 // Routes
 const routes = [
   {
-    path: '/',
+    path: "/",
     component: WebsiteLayout,
     children: [
       {
-        path: '',
-        component: () => import('../views/Website/Index.vue'),
+        path: "",
+        component: () => import("../views/Website/Index.vue"),
       },
     ],
   },
   {
-    path: '/course',
+    path: "/course",
     component: WebsiteLayout,
     children: [
       {
-        path: '',
-        component: () => import('../views/Website/Course.vue'),
+        path: "",
+        component: () => import("../views/Website/Course.vue"),
       },
     ],
   },
 
   // Auth Routes
   {
-    path: '/login',
-    component: () => import('../views/Auth/Login.vue'),
+    path: "/login",
+    component: () => import("../views/Auth/Login.vue"),
   },
   {
-    path: '/register',
-    component: () => import('../views/Auth/Register.vue'),
+    path: "/register",
+    component: () => import("../views/Auth/Register.vue"),
   },
 
   // Student Dashboard (Only accessible by students)
   {
-    path: '/dashboard',
+    path: "/dashboard",
     component: StudentLayout,
-    meta: { requiresAuth: true, role: 'student' },
+    meta: { requiresAuth: true, role: "student" },
     children: [
       {
-        path: '',
-        component: () => import('../views/Student/Dashboard.vue'),
+        path: "",
+        component: () => import("../views/Student/Dashboard.vue"),
       },
     ],
   },
 
   // Admin Dashboard (Only accessible by admins)
   {
-    path: '/admin-dashboard',
+    path: "/admin-dashboard",
     component: AdminLayout,
-    meta: { requiresAuth: true, role: 'admin' },
+    meta: { requiresAuth: true, role: "admin" },
     children: [
       {
-        path: '',
-        component: () => import('../views/Admin/Dashboard.vue'),
+        path: "",
+        component: () => import("../views/Admin/Dashboard.vue"),
+      },
+      {
+        path: "courses",
+        name: "CourseList",
+        component: () => import("../views/Admin/CourseList.vue"),
+      },
+      {
+        path: "courses/create",
+        name: "CourseCreate",
+        component: () => import("../views/Admin/CourseForm.vue"),
+      },
+      {
+        path: "courses/:id/edit",
+        name: "CourseEdit",
+        component: () => import("../views/Admin/CourseForm.vue"),
+      },
+      {
+        path: "courses/:id/content",
+        name: "LectureManagement",
+        component: () => import("../views/Admin/LectureManagement.vue"),
+      },
+      {
+        path: "courses/:id/faqs",
+        name: "FaqManagement",
+        component: () => import("../views/Admin/FaqManagement.vue"),
       },
     ],
   },
-];
+]
 
 // Create Router
 const router = createRouter({
   history: createWebHistory(),
   routes,
-});
+})
 
 // Navigation Guard
 router.beforeEach((to, from, next) => {
-  const loggedIn = localStorage.getItem('token');
-  const role = localStorage.getItem('role');
+  const loggedIn = localStorage.getItem("token")
+  const role = localStorage.getItem("role")
 
   // logged-in users can not access login and register pages
-  if (loggedIn && (to.path === '/login' || to.path === '/register')) {
-    next(role === 'admin' ? '/admin-dashboard' : '/dashboard');
+  if (loggedIn && (to.path === "/login" || to.path === "/register")) {
+    next(role === "admin" ? "/admin-dashboard" : "/dashboard")
   }
   // Restrict access based on user role
-  else if (to.path.startsWith('/admin-dashboard') && role !== 'admin') {
-    next('/dashboard');
-  }
-  else if (to.path.startsWith('/dashboard') && role !== 'student') {
-    next('/admin-dashboard');
+  else if (to.path.startsWith("/admin-dashboard") && role !== "admin") {
+    next("/dashboard")
+  } else if (to.path.startsWith("/dashboard") && role !== "student") {
+    next("/admin-dashboard")
   }
   // Protect all authenticated routes
-  else if (to.matched.some(record => record.meta.requiresAuth) && !loggedIn) {
-    next('/login');
+  else if (to.matched.some((record) => record.meta.requiresAuth) && !loggedIn) {
+    next("/login")
+  } else {
+    next()
   }
-  else {
-    next();
-  }
-});
+})
 
-export default router;
+export default router

@@ -632,7 +632,7 @@
                       <span>English</span>
                     </li>
                     <li class="list-group-item d-flex justify-content-between align-items-center">
-                      <span class="h6 fw-light mb-0"><i class="fas fa-fw fa-user-clock text-primary"></i>Deadline</span>
+                      <span class="h6 fw-light mb-0"><i class="fas fa-fw fa-user-clock text-primary"></i>Last Update</span>
                       <span>Nov 30 2021</span>
                     </li>
                     <li class="list-group-item d-flex justify-content-between align-items-center">

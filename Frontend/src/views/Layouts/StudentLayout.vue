@@ -1,5 +1,5 @@
 <template>
-  <div class="g-sidenav-show bg-gray-100" :class="sidebarClass">
+  <div class="g-sidenav-show" :class="sidebarClass">
     <!-- Sidebar -->
     <aside class="sidenav navbar navbar-vertical navbar-expand-xs border-0 border-radius-xl my-3 fixed-start ms-3"
       id="sidenav-main" data-color="dark">

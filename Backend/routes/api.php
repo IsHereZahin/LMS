@@ -2,7 +2,12 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\API\FaqController;
+use App\Http\Controllers\API\NoteController;
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\API\CourseController;
+use App\Http\Controllers\API\SectionController;
+use App\Http\Controllers\API\LectureController;
 
 /*
 |--------------------------------------------------------------------------
@@ -25,3 +30,25 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 });
 
+
+// Admin Middleware Group
+Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
+    // Course routes
+    Route::apiResource('courses', CourseController::class);
+
+    // Section routes
+    Route::get('courses/{courseId}/sections', [SectionController::class, 'index']);
+    Route::apiResource('sections', SectionController::class)->except(['index']);
+
+    // Lecture routes
+    Route::get('sections/{sectionId}/lectures', [LectureController::class, 'index']);
+    Route::apiResource('lectures', LectureController::class)->except(['index']);
+
+    // Note routes
+    Route::get('sections/{sectionId}/notes', [NoteController::class, 'index']);
+    Route::apiResource('notes', NoteController::class)->except(['index']);
+
+    // FAQ routes
+    Route::get('courses/{courseId}/faqs', [FaqController::class, 'index']);
+    Route::apiResource('faqs', FaqController::class)->except(['index']);
+});
