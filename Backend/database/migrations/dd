@@ -1,0 +1,981 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('orders', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
+            $table->foreignId('course_id')->constrained('courses')->cascadeOnDelete();
+            $table->decimal('amount', 10, 2);
+            $table->string('payment_method')->nullable();
+            $table->string('transaction_id')->unique()->nullable();
+            $table->enum('payment_status', ['pending', 'completed', 'failed'])->default('pending');
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('orders');
+    }
+};
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('course_progress', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
+            $table->foreignId('course_id')->constrained('courses')->cascadeOnDelete();
+            $table->integer('current_section')->nullable();
+            $table->decimal('progress_percentage', 5, 2)->default(0);
+            $table->timestamp('completed_at')->nullable();
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('course_progress');
+    }
+};
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class CourseProgress extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+        'user_id',
+        'course_id',
+        'current_section',
+        'progress_percentage',
+        'completed_at',
+    ];
+
+    protected $casts = [
+        'completed_at' => 'datetime',
+    ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function course()
+    {
+        return $this->belongsTo(Course::class);
+    }
+
+    // Calculate Progress if sections are completed
+    public function calculateProgress()
+    {
+        return $this->progress_percentage;
+    }
+}
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Order extends Model
+{
+    use HasFactory;
+
+    protected $fillable = ['user_id', 'course_id', 'amount', 'payment_method','transaction_id','payment_status'];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function course()
+    {
+        return $this->belongsTo(Course::class);
+    }
+}
+<?php
+
+namespace App\Http\Controllers\API;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+
+class CourseProgressController extends Controller
+{
+    // Update course progress
+    public function updateProgress(Request $request, $courseId)
+    {
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'progress_percentage' => 'required|numeric|between:0,100',
+            'current_section' => 'nullable|integer',
+        ]);
+
+        // Find or create course progress record
+        $progress = CourseProgress::updateOrCreate(
+            ['user_id' => $request->user_id, 'course_id' => $courseId],
+            [
+                'progress_percentage' => $request->progress_percentage,
+                'current_section' => $request->current_section,
+                'completed_at' => $request->progress_percentage == 100 ? now() : null,
+            ]
+        );
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Course progress updated successfully!',
+            'progress' => $progress,
+        ]);
+    }
+}
+<?php
+
+namespace App\Http\Controllers\API;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+
+class OrderController extends Controller
+{
+    //
+}
+<template>
+  <div>
+    <div v-if="loading" class="loading-container">
+      <div class="loading-spinner"></div>
+    </div>
+
+    <div v-else-if="error" class="alert alert-danger">
+      {{ error }}
+    </div>
+
+    <div v-else>
+      <!-- Video START -->
+      <section class="py-0 pb-lg-5">
+        <div class="container">
+          <div class="row g-3">
+            <!-- Course video START -->
+            <div class="col-12">
+              <div class="video-player rounded-3 mt-8">
+                <div class=" ratio-16x9">
+                  <iframe
+                    v-if="currentVideo"
+                    :src="'https://www.youtube.com/embed/' + currentVideo + '?autoplay=1'"
+                    title="YouTube video player"
+                    frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    referrerpolicy="strict-origin-when-cross-origin"
+                    allowfullscreen>
+                  </iframe>
+                  <div v-else
+                      class="placeholder-video position-relative"
+                      :style="{ backgroundImage: `url(${getThumbnailUrl(course.thumbnail)})` }">
+                    <div class="placeholder-overlay d-flex flex-column align-items-center justify-content-center">
+                      <i class="fas fa-play-circle fs-1 text-white opacity-75 mb-2"></i>
+                      <p class="text-white mb-0">Select a lecture to start playing</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- Course video END -->
+
+            <!-- Playlist responsive toggler START -->
+            <div class="col-12">
+              <button class="btn btn-primary d-lg-none mb-4" type="button" data-bs-toggle="offcanvas"
+                data-bs-target="#offcanvasSidebar" aria-controls="offcanvasSidebar">
+                <i class="bi bi-camera-video me-1"></i> Playlist
+              </button>
+            </div>
+            <!-- Playlist responsive toggler END -->
+          </div>
+        </div>
+      </section>
+      <!-- Video END -->
+
+      <!-- Page content START -->
+      <section class="pt-0">
+        <div class="container">
+          <div class="row g-lg-5">
+
+            <!-- Main content START -->
+            <div class="col-lg-8">
+              <div class="row g-4">
+                <div class="col-12">
+                  <!-- Course Title -->
+                  <h1>{{ course.title }}</h1>
+                </div>
+
+                <!-- Course detail START -->
+                <div class="col-lg-12">
+                  <div class="bg-body shadow rounded-2 p-4">
+                    <!-- Tabs START -->
+                    <ul class="nav nav-pills nav-tabs-line pt-0" id="course-pills-tab" role="tablist">
+                      <!-- Tab item -->
+                      <li class="nav-item me-2 me-sm-4" role="presentation">
+                        <button class="nav-link mb-2 mb-md-0" :class="{ active: activeTab === 'overview' }"
+                          id="course-pills-tab-1" @click="setActiveTab('overview')"
+                          type="button" role="tab" aria-controls="course-pills-1" aria-selected="true">Overview</button>
+                      </li>
+                      <!-- Tab item -->
+                      <li class="nav-item me-2 me-sm-4" role="presentation">
+                        <button class="nav-link mb-2 mb-md-0" :class="{ active: activeTab === 'curriculum' }"
+                          id="course-pills-tab-2" @click="setActiveTab('curriculum')"
+                          type="button" role="tab" aria-controls="course-pills-2" aria-selected="false">Curriculum</button>
+                      </li>
+                      <!-- Tab item -->
+                      <li class="nav-item me-2 me-sm-4" role="presentation">
+                        <button class="nav-link mb-2 mb-md-0" :class="{ active: activeTab === 'faqs' }"
+                          id="course-pills-tab-5" @click="setActiveTab('faqs')"
+                          type="button" role="tab" aria-controls="course-pills-5" aria-selected="false">FAQs</button>
+                      </li>
+                    </ul>
+                    <hr>
+                    <!-- Tabs END -->
+
+                    <!-- Tab contents START -->
+                    <div class="tab-content pt-2" id="course-pills-tabContent">
+                      <!-- Overview Content START -->
+                      <div class="tab-pane fade" :class="{ 'show active': activeTab === 'overview' }"
+                        id="course-pills-1" role="tabpanel" aria-labelledby="course-pills-tab-1">
+                        <!-- Course detail START -->
+                        <h5 class="mb-3">Course Description</h5>
+                        <p class="mb-3">{{ course.description }}</p>
+
+                        <!-- List content -->
+                        <h5 class="mt-4">What you'll learn</h5>
+                        <ul class="list-group list-group-borderless mb-3">
+                          <li v-for="(item, index) in course.what_you_learn" :key="index"
+                            class="list-group-item h6 fw-light d-flex mb-0">
+                            <i class="fas fa-check-circle text-success me-2"></i>{{ item }}
+                          </li>
+                        </ul>
+                        <!-- Course detail END -->
+                      </div>
+                      <!-- Overview Content END -->
+
+                      <!-- Curriculum Content START -->
+                      <div class="tab-pane fade" :class="{ 'show active': activeTab === 'curriculum' }"
+                        id="course-pills-2" role="tabpanel" aria-labelledby="course-pills-tab-2">
+                        <!-- Course accordion START -->
+                        <div class="accordion accordion-icon accordion-bg-light" id="accordionExample2">
+                          <!-- Item -->
+                          <div class="accordion-item mb-3" v-for="(section, index) in sections" :key="section.id">
+                            <h6 class="accordion-header font-base" :id="'heading-' + section.id">
+                              <button class="accordion-button fw-bold rounded d-sm-flex d-inline-block"
+                                :class="{ 'collapsed': !section.isOpen }"
+                                type="button"
+                                @click="toggleSection(index)"
+                                aria-expanded="true"
+                                :aria-controls="'collapse-' + section.id">
+                                {{ section.title }}
+                                <span class="small ms-0 ms-sm-2">
+                                  ({{ section.lectures.length }} Lectures)
+                                  <span v-if="section.notes && section.notes.length"> and ({{ section.notes.length }} Notes)</span>
+                                </span>
+                              </button>
+                            </h6>
+                            <div :id="'collapse-' + section.id" class="accordion-collapse collapse"
+                              :class="{ 'show': section.isOpen }"
+                              :aria-labelledby="'heading-' + section.id" data-bs-parent="#accordionExample2">
+                              <div class="accordion-body mt-3">
+                                <!-- Section Header -->
+                                <h5 class="fw-bold">{{ section.title }}</h5>
+
+                                <!-- Lectures -->
+                                <div v-for="(lecture, lectureIndex) in section.lectures" :key="lecture.id">
+                                  <div class="d-flex justify-content-between align-items-center">
+                                    <div class="position-relative d-flex align-items-center">
+                                      <a href="#" @click.prevent="playVideo(lecture.youtube_video_id)"
+                                        class="btn btn-danger-soft btn-round btn-sm mb-0 stretched-link position-static">
+                                        <i class="fas fa-play me-0"></i>
+                                      </a>
+                                      <span class="d-inline-block text-truncate ms-2 mb-0 h6 fw-light w-100px w-sm-200px w-md-400px">
+                                        {{ lecture.title }}
+                                      </span>
+                                      <span v-if="lecture.is_premium" class="badge bg-orange text-white ms-2 ms-md-0">
+                                        <i class="fas fa-lock fa-fw me-1"></i> Premium
+                                      </span>
+                                      <span v-else class="badge bg-success text-white ms-2 ms-md-0">
+                                        <i class="fas fa-unlock fa-fw me-1"></i> Free
+                                      </span>
+                                    </div>
+                                    <p class="mb-0">{{ formatDuration(lecture.duration) }}</p>
+                                  </div>
+                                  <hr v-if="lectureIndex < section.lectures.length - 1">
+                                </div>
+
+                                <!-- Section Notes -->
+                                <div v-if="section.notes && section.notes.length">
+                                  <hr>
+                                  <div v-for="(note, noteIndex) in section.notes" :key="note.id">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                      <div class="position-relative d-flex align-items-center">
+                                        <a @click.prevent="downloadNote(note)"
+                                          class="btn btn-dark-soft btn-round btn-sm mb-0 stretched-link position-static"
+                                          href="#">
+                                          <i class="fas fa-file-pdf me-0"></i>
+                                        </a>
+                                        <span class="d-inline-block text-truncate ms-2 mb-0 h6 fw-light w-100px w-sm-200px w-md-400px">
+                                          {{ note.title }} ({{ note.file_size || 'Unknown size' }})
+                                        </span>
+                                        <span v-if="note.is_premium" class="badge bg-orange text-white ms-2 ms-md-0">
+                                          <i class="fas fa-lock fa-fw me-1"></i> Premium
+                                        </span>
+                                        <span v-else class="badge bg-success text-white ms-2 ms-md-0">
+                                          <i class="fas fa-unlock fa-fw me-1"></i> Free
+                                        </span>
+                                      </div>
+                                    </div>
+                                    <hr v-if="noteIndex < section.notes.length - 1">
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <!-- Course accordion END -->
+                      </div>
+                      <!-- Curriculum Content END -->
+
+                      <!-- FAQs Content START -->
+                      <div class="tab-pane fade" :class="{ 'show active': activeTab === 'faqs' }"
+                        id="course-pills-5" role="tabpanel" aria-labelledby="course-pills-tab-5">
+                        <!-- Title -->
+                        <h5 class="mb-3">Frequently Asked Questions</h5>
+                        <!-- Accordion START -->
+                        <div class="accordion accordion-flush" id="accordionExample">
+                          <!-- Item -->
+                          <div class="accordion-item" v-for="(faq, index) in faqs" :key="faq.id">
+                            <h2 class="accordion-header" :id="'faqHeading' + index">
+                              <button class="accordion-button" :class="{ 'collapsed': !faq.isOpen }" type="button"
+                                @click="toggleFaq(index)"
+                                aria-expanded="true" :aria-controls="'faqCollapse' + index">
+                                <span class="text-secondary fw-bold me-3">{{ String(index + 1).padStart(2, '0') }}</span>
+                                <span class="fw-bold">{{ faq.question }}</span>
+                              </button>
+                            </h2>
+                            <div :id="'faqCollapse' + index" class="accordion-collapse collapse"
+                              :class="{ 'show': faq.isOpen }"
+                              :aria-labelledby="'faqHeading' + index" data-bs-parent="#accordionExample">
+                              <div class="accordion-body pt-0">
+                                {{ faq.answer }}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <!-- Accordion END -->
+                      </div>
+                      <!-- FAQs Content END -->
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- Main content END -->
+
+            <!-- Right sidebar START -->
+            <div class="col-lg-4 pt-5 pt-lg-0">
+              <div class="row mb-5 mb-lg-0">
+                <div class="col-md-6 col-lg-12">
+                  <!-- Video START -->
+                  <div class="card shadow p-2 mb-4 z-index-9">
+                    <div class="overflow-hidden rounded-3">
+                      <img :src="getThumbnailUrl(course.thumbnail)" class="card-img" alt="course image">
+                    </div>
+
+                    <!-- Card body -->
+                    <div class="card-body px-3">
+                      <!-- Info -->
+                      <div class="d-flex justify-content-between align-items-center">
+                        <!-- Price and time -->
+                        <div v-if="course.price > 0">
+                          <div class="d-flex align-items-center">
+                            <h3 class="fw-bold mb-0 me-2">${{ getDiscountedPrice }}</h3>
+                            <span v-if="hasValidDiscount" class="text-decoration-line-through mb-0 me-2">${{ course.price }}</span>
+                            <span v-if="hasValidDiscount" class="badge bg-orange text-white mb-0">
+                              {{ calculateDiscountPercentage }}% off
+                            </span>
+                          </div>
+                          <p v-if="hasValidDiscount && course.discount_ends_at" class="mb-0 text-danger">
+                            <i class="fas fa-stopwatch me-2"></i>{{ daysLeft }} days left at this price
+                          </p>
+                        </div>
+                        <div v-else>
+                          <h3 class="fw-bold mb-0 me-2">Free</h3>
+                        </div>
+
+                        <!-- Share button with dropdown -->
+                        <div class="dropdown">
+                          <!-- Share button -->
+                          <a href="#" class="btn btn-sm btn-light rounded small">
+                            <i class="fas fa-fw fa-share-alt"></i>
+                          </a>
+                        </div>
+                      </div>
+
+                      <!-- Buttons -->
+                      <div class="mt-3 d-sm-flex justify-content-sm-between">
+                        <a href="#" class="btn btn-outline-primary mb-0">Free trial</a>
+                        <a href="#" class="btn btn-success mb-0">Buy course</a>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- Video END -->
+
+                  <!-- Course info START -->
+                  <div class="card card-body shadow p-4 mb-4">
+                    <!-- Title -->
+                    <h4 class="mb-3">This course includes</h4>
+                    <ul class="list-group list-group-borderless">
+                      <!-- Calculate total lectures -->
+                      <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span class="h6 fw-light mb-0"><i class="fas fa-fw fa-book-open text-primary"></i>Lectures</span>
+                        <span>{{ totalLectures }}</span>
+                      </li>
+                      <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span class="h6 fw-light mb-0"><i class="fas fa-fw fa-clock text-primary"></i>Duration</span>
+                        <span>{{ formatTotalDuration }}</span>
+                      </li>
+                      <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span class="h6 fw-light mb-0"><i class="fas fa-fw fa-signal text-primary"></i>Level</span>
+                        <span>{{ course.level }}</span>
+                      </li>
+                      <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span class="h6 fw-light mb-0"><i class="fas fa-fw fa-globe text-primary"></i>Language</span>
+                        <span>{{ course.language }}</span>
+                      </li>
+                      <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span class="h6 fw-light mb-0"><i class="fas fa-fw fa-user-clock text-primary"></i>Last Update</span>
+                        <span>{{ formatDate(course.updated_at) }}</span>
+                      </li>
+                      <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span class="h6 fw-light mb-0"><i class="fas fa-fw fa-medal text-primary"></i>Certificate</span>
+                        <span>{{ course.certificate ? 'Yes' : 'No' }}</span>
+                      </li>
+                    </ul>
+                  </div>
+                  <!-- Course info END -->
+                </div>
+              </div><!-- Row End -->
+            </div>
+            <!-- Right sidebar END -->
+          </div><!-- Row END -->
+        </div>
+      </section>
+      <!-- Page content END -->
+    </div>
+  </div>
+</template>
+
+<script>
+import { ref, computed, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
+import api from '@/api'
+
+export default {
+  setup() {
+    const route = useRoute()
+    const courseId = route.params.id
+
+    // Data states
+    const course = ref({})
+    const sections = ref([])
+    const faqs = ref([])
+    const loading = ref(true)
+    const error = ref(null)
+    const activeTab = ref('overview')
+    const currentVideo = ref(null)
+
+    // Fetch course data
+    const fetchCourse = async () => {
+      try {
+        loading.value = true
+        const response = await api.get(`/course/${courseId}`)
+
+        // Correctly access nested data
+        course.value = response.data.data
+
+        // Transform sections from data.data.sections
+        sections.value = response.data.data.sections.map(section => ({
+          ...section,
+          isOpen: false
+        }))
+
+        // Set first section to open
+        if (sections.value.length > 0) {
+          sections.value[0].isOpen = true
+        }
+
+        // Transform FAQs from data.data.faqs
+        faqs.value = response.data.data.faqs.map((faq, index) => ({
+          ...faq,
+          isOpen: index === 0
+        }))
+
+        loading.value = false
+      } catch (err) {
+        console.error('Error fetching course:', err)
+        error.value = 'Failed to load course details. Please try again.'
+        loading.value = false
+      }
+    }
+    // Total lectures count
+    const totalLectures = computed(() => {
+      return sections.value.reduce((total, section) => {
+        return total + section.lectures.length
+      }, 0)
+    })
+
+    // Format total duration
+    const formatTotalDuration = computed(() => {
+      const totalMinutes = course.value.duration || 0
+      const hours = Math.floor(totalMinutes / 60)
+      const minutes = totalMinutes % 60
+
+      if (hours > 0) {
+        return `${hours}h ${minutes}m`
+      }
+      return `${minutes}m`
+    })
+
+    // Format lecture duration
+    const formatDuration = (minutes) => {
+      const hrs = Math.floor(minutes / 60)
+      const mins = minutes % 60
+
+      if (hrs > 0) {
+        return `${hrs}h ${mins}m`
+      }
+      return `${mins}m`
+    }
+
+    // Format date
+    const formatDate = (dateString) => {
+      if (!dateString) return 'Unknown'
+      const date = new Date(dateString)
+      const options = { year: 'numeric', month: 'short', day: 'numeric' }
+      return date.toLocaleDateString('en-US', options)
+    }
+
+    // Toggle curriculum section
+    const toggleSection = (index) => {
+      sections.value[index].isOpen = !sections.value[index].isOpen
+    }
+
+    // Toggle FAQ
+    const toggleFaq = (index) => {
+      faqs.value = faqs.value.map((faq, i) => ({
+        ...faq,
+        isOpen: i === index ? !faq.isOpen : faq.isOpen
+      }))
+    }
+
+    // Get thumbnail URL
+    const getThumbnailUrl = (path) => {
+      if (!path) return ''
+      return `${api.defaults.baseURL.replace('/api', '')}/storage/${path}`
+    }
+
+    // Play video
+    const playVideo = (youtubeVideoId) => {
+      if (youtubeVideoId) {
+        currentVideo.value = youtubeVideoId
+      } else {
+        alert('This lecture has no video available.')
+      }
+    }
+
+    // Download note
+    const downloadNote = (note) => {
+      if (note.is_premium && !isPremiumUser.value) {
+        alert('This is a premium note. Please purchase the course to access it.')
+        return
+      }
+
+      window.open(`${api.defaults.baseURL.replace('/api', '')}/storage/${note.file}`, '_blank')
+    }
+
+    // Check if discount is valid
+    const hasValidDiscount = computed(() => {
+      return course.value.discount > 0 &&
+        (!course.value.discount_ends_at || new Date(course.value.discount_ends_at) > new Date())
+    })
+
+    // Calculate discounted price
+    const getDiscountedPrice = computed(() => {
+      if (hasValidDiscount.value) {
+        return (parseFloat(course.value.price) - parseFloat(course.value.discount)).toFixed(2)
+      }
+      return parseFloat(course.value.price).toFixed(2)
+    })
+
+    // Calculate discount percentage
+    const calculateDiscountPercentage = computed(() => {
+      if (hasValidDiscount.value && parseFloat(course.value.price) > 0) {
+        return Math.round((parseFloat(course.value.discount) / parseFloat(course.value.price)) * 100)
+      }
+      return 0
+    })
+
+    // Calculate days left for discount
+    const daysLeft = computed(() => {
+      if (!course.value.discount_ends_at) return 0
+
+      const endDate = new Date(course.value.discount_ends_at)
+      const today = new Date()
+      const diffTime = endDate - today
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+
+      return diffDays > 0 ? diffDays : 0
+    })
+
+    // Is user premium (would be implemented with authentication)
+    const isPremiumUser = ref(false)
+
+    // Set active tab
+    const setActiveTab = (tab) => {
+      activeTab.value = tab
+    }
+
+    // Fetch course on component mount
+    onMounted(() => {
+      fetchCourse()
+    })
+
+    return {
+      course,
+      sections,
+      faqs,
+      loading,
+      error,
+      activeTab,
+      currentVideo,
+      totalLectures,
+      formatTotalDuration,
+      formatDuration,
+      formatDate,
+      toggleSection,
+      toggleFaq,
+      getThumbnailUrl,
+      playVideo,
+      downloadNote,
+      hasValidDiscount,
+      getDiscountedPrice,
+      calculateDiscountPercentage,
+      daysLeft,
+      isPremiumUser,
+      setActiveTab
+    }
+  }
+}
+</script>
+
+<style>
+/* Video player styles */
+.video-player {
+  position: relative;
+  width: 100%;
+  background-color: #000;
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.video-player video {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.placeholder-video {
+  width: 100%;
+  height: 400px;
+  background-color: #212529;
+  color: #fff;
+}
+
+/* Tab styling */
+.accordion-button:not(.collapsed) {
+  background-color: rgba(var(--bs-primary-rgb), 0.1);
+  color: var(--bs-primary);
+}
+
+.nav-tabs-line .nav-link.active {
+  border-bottom: 3px solid var(--bs-primary);
+  color: var(--bs-primary);
+}
+
+/* Loading spinner */
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+}
+
+.loading-spinner {
+  width: 3rem;
+  height: 3rem;
+  border: 0.25rem solid rgba(0, 0, 0, 0.1);
+  border-right-color: #000;
+  border-radius: 50%;
+  animation: spinner-border 0.75s linear infinite;
+}
+
+@keyframes spinner-border {
+  to { transform: rotate(360deg); }
+}
+
+/* General spacing fixes */
+.mt-8 {
+  margin-top: 3rem;
+}
+
+.list-group-borderless .list-group-item {
+  border: none;
+  padding: 0.5rem 0;
+}
+
+/* Alert styles */
+.alert-danger {
+  background-color: #f8d7da;
+  color: #721c24;
+  padding: 1rem;
+  border-radius: 0.25rem;
+  margin-bottom: 1rem;
+}
+
+/* Video player styles */
+.video-player {
+  position: relative;
+  width: 100%;
+  background-color: #000;
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.ratio-16x9 {
+  aspect-ratio: 16 / 9;
+}
+
+.placeholder-video {
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.placeholder-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(2px);
+}
+
+/* Responsive iframe */
+.video-player iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+</style>
+
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('lectures', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('section_id')->constrained('sections')->cascadeOnDelete();
+            $table->string('title');
+            $table->integer('duration')->comment('Duration in minutes');
+            $table->string('youtube_video_id')->nullable();
+            $table->boolean('is_premium')->default(false);
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('lectures');
+    }
+};
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('notes', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('section_id')->constrained('sections')->cascadeOnDelete();
+            $table->string('title');
+            $table->string('file');
+            $table->string('file_size')->nullable();
+            $table->boolean('is_premium')->default(true);
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('notes');
+    }
+};
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('courses', function (Blueprint $table) {
+            $table->id();
+            $table->string('title');
+            $table->text('description')->nullable();
+            $table->string('category');
+            $table->string('language');
+            $table->boolean('certificate')->default(false);
+            $table->json('what_you_learn');
+
+            $table->decimal('price', 10, 2)->default(0.00);
+            $table->decimal('discount', 10, 2)->nullable()->default(0.00);
+            $table->date('discount_ends_at')->nullable();
+
+            $table->string('thumbnail');
+            $table->integer('duration')->nullable();
+            $table->enum('level', ['Beginner', 'Intermediate', 'Advanced']);
+            $table->boolean('publish')->default(false);
+
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('courses');
+    }
+};
+<?php
+
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\API\FaqController;
+use App\Http\Controllers\API\NoteController;
+use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\API\CourseController;
+use App\Http\Controllers\API\SectionController;
+use App\Http\Controllers\API\LectureController;
+
+/*
+|--------------------------------------------------------------------------
+| API Routes
+|--------------------------------------------------------------------------
+|
+| Here is where you can register API routes for your application. These
+| routes are loaded by the RouteServiceProvider and all of them will
+| be assigned to the "api" middleware group. Make something great!
+|
+*/
+
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/login', [AuthController::class, 'login']);
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/logout', [AuthController::class, 'logout']);
+    Route::get('/user', function (Request $request) {
+        return $request->user();
+    });
+});
+
+// Course routes
+Route::get('/course/{id}', [CourseController::class, 'show']);
+
+// Admin Middleware Group
+Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
+    // Course routes
+    Route::apiResource('courses', CourseController::class);
+
+    // Section routes
+    Route::get('courses/{courseId}/sections', [SectionController::class, 'index']);
+    Route::apiResource('sections', SectionController::class)->except(['index']);
+
+    // Lecture routes
+    Route::get('sections/{sectionId}/lectures', [LectureController::class, 'index']);
+    Route::apiResource('lectures', LectureController::class)->except(['index']);
+
+    // Note routes
+    Route::get('sections/{sectionId}/notes', [NoteController::class, 'index']);
+    Route::apiResource('notes', NoteController::class)->except(['index']);
+
+    // FAQ routes
+    Route::get('courses/{courseId}/faqs', [FaqController::class, 'index']);
+    Route::apiResource('faqs', FaqController::class)->except(['index']);
+});

@@ -13,7 +13,7 @@ class Lecture extends Model
         'section_id',
         'title',
         'duration',
-        'video_url',
+        'youtube_video_id',
         'is_premium'
     ];
 
@@ -25,5 +25,6 @@ class Lecture extends Model
     {
         return $this->belongsTo(Section::class);
     }
+    
 }
 

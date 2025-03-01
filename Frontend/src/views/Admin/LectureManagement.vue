@@ -202,7 +202,7 @@
             <input
               type="text"
               id="lectureVideo"
-              v-model="lectureForm.video_url"
+              v-model="lectureForm.youtube_video_id"
               class="form-control"
               placeholder="YouTube or Vimeo URL"
             >
@@ -320,7 +320,7 @@ export default {
       lectureForm: {
         title: '',
         duration: 0,
-        video_url: '',
+        youtube_video_id: '',
         is_premium: false
       },
 
@@ -482,7 +482,7 @@ export default {
       this.lectureForm = {
         title: '',
         duration: 0,
-        video_url: '',
+        youtube_video_id: '',
         is_premium: false
       }
       this.showLectureModal = true
@@ -494,7 +494,7 @@ export default {
       this.lectureForm = {
         title: lecture.title,
         duration: lecture.duration,
-        video_url: lecture.video_url || '',
+        youtube_video_id: lecture.youtube_video_id || '',
         is_premium: lecture.is_premium
       }
       this.showLectureModal = true
@@ -507,7 +507,7 @@ export default {
       this.lectureForm = {
         title: '',
         duration: 0,
-        video_url: '',
+        youtube_video_id: '',
         is_premium: false
       }
     },
@@ -525,7 +525,7 @@ export default {
           response = await api.put(`/lectures/${this.editingLectureId}`, {
             title: this.lectureForm.title,
             duration: this.lectureForm.duration,
-            video_url: this.lectureForm.video_url,
+            youtube_video_id: this.lectureForm.youtube_video_id,
             is_premium: this.lectureForm.is_premium
           })
 
@@ -548,7 +548,7 @@ export default {
             section_id: this.currentSectionId,
             title: this.lectureForm.title,
             duration: this.lectureForm.duration,
-            video_url: this.lectureForm.video_url,
+            youtube_video_id: this.lectureForm.youtube_video_id,
             is_premium: this.lectureForm.is_premium
           })
 

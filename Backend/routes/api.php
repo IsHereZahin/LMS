@@ -8,6 +8,8 @@ use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\API\CourseController;
 use App\Http\Controllers\API\SectionController;
 use App\Http\Controllers\API\LectureController;
+use App\Http\Controllers\API\OrderController;
+use App\Http\Controllers\API\CourseProgressController;
 
 /*
 |--------------------------------------------------------------------------
@@ -28,8 +30,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', function (Request $request) {
         return $request->user();
     });
+
+    Route::post('/orders', [OrderController::class, 'store']);
+    Route::post('/enroll-free', [OrderController::class, 'enrollFree']);
+    Route::get('/check-purchase/{courseId}', [OrderController::class, 'checkPurchase']);
+
+    Route::get('/course-progress/show/{courseId}', [CourseProgressController::class, 'show']);
+    Route::post('/course-progress/update/{courseId}', [CourseProgressController::class, 'update']);
 });
 
+// Course routes
+Route::get('/course/{id}', [CourseController::class, 'show']);
 
 // Admin Middleware Group
 Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
@@ -51,4 +62,8 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
     // FAQ routes
     Route::get('courses/{courseId}/faqs', [FaqController::class, 'index']);
     Route::apiResource('faqs', FaqController::class)->except(['index']);
+
+    // Order management routes
+    Route::get('/orders', [OrderController::class, 'index']);
+    Route::put('/orders/{id}/status', [OrderController::class, 'updateStatus']);
 });

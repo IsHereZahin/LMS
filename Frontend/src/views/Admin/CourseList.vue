@@ -36,7 +36,7 @@
         </div>
         <div class="card-footer">
           <div class="btn-group">
-            <router-link :to="`/course?id=${course.id}`" class="btn btn-sm btn-outline">View</router-link>
+            <router-link :to="{ name: 'CourseView', params: { id: course.id } }" class="btn btn-sm btn-outline">View</router-link>
             <router-link :to="{ name: 'CourseEdit', params: { id: course.id }}" class="btn btn-sm btn-primary">Edit</router-link>
             <button @click="deleteCourse(course.id)" class="btn btn-sm btn-outline btn-delete">Delete</button>
           </div>

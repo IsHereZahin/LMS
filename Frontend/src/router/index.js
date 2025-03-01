@@ -13,15 +13,10 @@ const routes = [
         path: "",
         component: () => import("../views/Website/Index.vue"),
       },
-    ],
-  },
-  {
-    path: "/course",
-    component: WebsiteLayout,
-    children: [
       {
-        path: "",
-        component: () => import("../views/Website/Course.vue"),
+        path: "course/:id",
+        name: "CourseView",
+        component: () => import("../views/Website/CourseDetails.vue"),
       },
     ],
   },
@@ -83,6 +78,11 @@ const routes = [
         path: "courses/:id/faqs",
         name: "FaqManagement",
         component: () => import("../views/Admin/FaqManagement.vue"),
+      },
+      {
+        path: "orders",
+        name: "Orders",
+        component: () => import("../views/Admin/Orders.vue"),
       },
     ],
   },

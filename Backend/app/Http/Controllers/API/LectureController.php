@@ -25,7 +25,7 @@ class LectureController extends Controller
             'section_id' => 'required|exists:sections,id',
             'title' => 'required|string|max:255',
             'duration' => 'required|integer',
-            'video_url' => 'nullable|string|max:255',
+            'youtube_video_id' => 'nullable|string|max:255',
             'is_premium' => 'boolean'
         ]);
 
@@ -40,7 +40,7 @@ class LectureController extends Controller
             'section_id' => $request->section_id,
             'title' => $request->title,
             'duration' => $request->duration,
-            'video_url' => $request->video_url,
+            'youtube_video_id' => $request->youtube_video_id,
             'is_premium' => $request->is_premium ?? false
         ]);
 
@@ -68,7 +68,7 @@ class LectureController extends Controller
         $validator = Validator::make($request->all(), [
             'title' => 'required|string|max:255',
             'duration' => 'required|integer',
-            'video_url' => 'nullable|string|max:255',
+            'youtube_video_id' => 'nullable|string|max:255',
             'is_premium' => 'boolean'
         ]);
 
@@ -82,7 +82,7 @@ class LectureController extends Controller
         $lecture->update([
             'title' => $request->title,
             'duration' => $request->duration,
-            'video_url' => $request->video_url,
+            'youtube_video_id' => $request->youtube_video_id,
             'is_premium' => $request->is_premium ?? false
         ]);
 

@@ -11,13 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('lectures', function (Blueprint $table) {
+        Schema::create('course_progress', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('section_id')->constrained('sections')->cascadeOnDelete();
-            $table->string('title');
-            $table->integer('duration')->comment('Duration in minutes');
-            $table->string('youtube_video_id')->nullable();
-            $table->boolean('is_premium')->default(false);
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->foreignId('course_id')->constrained()->onDelete('cascade');
+            $table->json('completed_lessons')->nullable();
+            $table->string('progress_percentage')->nullable();
             $table->timestamps();
         });
     }
@@ -27,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('lectures');
+        Schema::dropIfExists('course_progress');
     }
 };

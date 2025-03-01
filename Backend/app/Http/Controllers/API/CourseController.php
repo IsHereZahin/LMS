@@ -73,8 +73,12 @@ class CourseController extends Controller
     {
         $course = Course::with(['sections.lectures', 'sections.notes', 'faqs'])->findOrFail($id);
 
+        if (is_string($course->what_you_learn)) {
+            $course->what_you_learn = json_decode($course->what_you_learn);
+        }
+
         return response()->json([
-            'success' => true,
+            'status' => 'success',
             'data' => $course
         ]);
     }
