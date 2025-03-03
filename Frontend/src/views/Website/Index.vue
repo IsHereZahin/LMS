@@ -65,7 +65,7 @@
 
               <!-- Search Results Dropdown -->
               <div v-if="showResults && filteredCourses.length > 0" class="search-results shadow rounded">
-                <div v-for="course in filteredCourses" :key="course.id" class="search-result-item" @mousedown="goToCourse(course.id)">
+                <router-link :to="{ name: 'CourseView', params: { id: course.id } }" v-for="course in filteredCourses" :key="course.id" class="search-result-item">
                   <div class="search-result-image">
                     <img :src="getImageUrl(course.thumbnail)" alt="Course thumbnail">
                   </div>
@@ -79,7 +79,7 @@
                       </div>
                     </div>
                   </div>
-                </div>
+                </router-link>
               </div>
             </div>
           </div>

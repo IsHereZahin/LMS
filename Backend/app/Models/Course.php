@@ -59,5 +59,10 @@ class Course extends Model
 
         return $this->price;
     }
+
+    public function progress()
+    {
+        return $this->hasOne(CourseProgress::class, 'course_id', 'id')->where('user_id', auth()->id());
+    }
 }
 

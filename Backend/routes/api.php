@@ -37,9 +37,11 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     Route::post('/orders', [OrderController::class, 'store']);
+    Route::get('/myOrders', [OrderController::class, 'myOrders']);
     Route::post('/enroll-free', [OrderController::class, 'enrollFree']);
     Route::get('/check-purchase/{courseId}', [OrderController::class, 'checkPurchase']);
 
+    Route::get('/myCourses', [CourseController::class, 'myCourses']);
     Route::get('/course-progress/show/{courseId}', [CourseProgressController::class, 'show']);
     Route::post('/course-progress/update/{courseId}', [CourseProgressController::class, 'update']);
 });

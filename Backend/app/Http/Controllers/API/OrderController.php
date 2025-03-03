@@ -16,6 +16,15 @@ class OrderController extends Controller
         return response()->json(['orders' => ['data' => $orders]]);
     }
 
+    public function myOrders()
+    {
+        $orders = Order::where('user_id', Auth::id())
+                    ->with('user', 'course')
+                    ->latest()
+                    ->get();
+        return response()->json(['orders' => ['data' => $orders]]);
+    }
+
     /**
      * Store a new order.
      */
@@ -24,27 +33,17 @@ class OrderController extends Controller
         $validated = $request->validate([
             'course_id' => 'required|exists:courses,id',
             'payment_method' => 'required|string',
-            'transaction_id' => 'required|string', // Remove unique rule here
+            'transaction_id' => 'required|string|unique:orders,transaction_id',
         ]);
 
         $course = Course::findOrFail($validated['course_id']);
         $discountedPrice = max($course->price - $course->discount, 0);
 
-        // Check if the order already exists for the user and course
-        $order = Order::where('user_id', Auth::id())
-            ->where('course_id', $validated['course_id'])
-            ->first();
+        // Check if an order already exists for this course
+        $order = Order::where('course_id', $validated['course_id'])->first();
 
         if ($order) {
-            // If the transaction_id has changed, check uniqueness
-            if ($order->transaction_id !== $validated['transaction_id']) {
-                $existingTransaction = Order::where('transaction_id', $validated['transaction_id'])->exists();
-                if ($existingTransaction) {
-                    return response()->json(['message' => 'Transaction ID already exists.'], 422);
-                }
-            }
-
-            // Update the existing order
+            // Update the existing order for this course
             $order->update([
                 'amount' => $discountedPrice,
                 'payment_method' => $validated['payment_method'],
@@ -54,7 +53,7 @@ class OrderController extends Controller
 
             return response()->json(['message' => 'Order updated successfully', 'order' => $order], 200);
         } else {
-            // Create a new order
+            // Create a new order for the course
             $order = Order::create([
                 'user_id' => Auth::id(),
                 'course_id' => $course->id,
