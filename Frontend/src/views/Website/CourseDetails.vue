@@ -639,63 +639,70 @@
                             </div>
                           </div>
 
-                          <!-- If user hasn't purchased yet or needs to repurchase -->
-                          <div
-                            v-if="!purchaseStatus.purchased || (purchaseStatus.purchased && purchaseStatus.order.payment_status === 'failed')">
-                            <!-- Purchase form -->
-                            <div v-if="!showPurchaseForm && !purchaseStatus.purchased" class="text-center">
-                              <button @click="showPurchaseForm = true" class="btn btn-dark">
-                                Purchase Now
-                              </button>
-                            </div>
+                          <a v-if="course.price === 0 && !purchaseStatus.purchased" @click.prevent="enrollFree" href="#" class="btn btn-dark mb-0 w-100" :disabled="enrollLoading">
+                            <span v-if="enrollLoading"><i class="fas fa-spinner fa-spin me-2"></i>Enrolling...</span>
+                            <span v-else>Enroll for Free</span>
+                          </a>
 
-                            <div v-if="showPurchaseForm" class="card p-4 mt-3">
-                              <h5 class="mb-3">Complete Your Purchase</h5>
-                              <form @submit.prevent="submitPurchase">
-                                <div class="mb-3">
-                                  <label for="paymentMethod" class="form-label">Payment Method</label>
-                                  <select v-model="purchaseForm.payment_method" id="paymentMethod" class="form-select"
-                                    required>
-                                    <option value="">Select payment method</option>
-                                    <option value="bKash">bKash</option>
-                                    <option value="Nagad">Nagad</option>
-                                    <option value="Rocket">Rocket</option>
-                                    <option value="Bank Transfer">Bank Transfer</option>
-                                  </select>
-                                </div>
+                          <div v-else>
+                            <!-- If user hasn't purchased yet or needs to repurchase -->
+                            <div
+                              v-if="!purchaseStatus.purchased || (purchaseStatus.purchased && purchaseStatus.order.payment_status === 'failed')">
+                              <!-- Purchase form -->
+                              <div v-if="!showPurchaseForm && !purchaseStatus.purchased" class="text-center">
+                                <button @click="showPurchaseForm = true" class="btn btn-dark">
+                                  Purchase Now
+                                </button>
+                              </div>
 
-                                <div class="mb-3">
-                                  <label for="transactionId" class="form-label">Transaction ID</label>
-                                  <input type="text" v-model="purchaseForm.transaction_id" class="form-control"
-                                    id="transactionId" placeholder="Enter your transaction ID" required>
-                                  <small class="form-text text-muted">
-                                    Please enter the transaction ID from your payment provider.
-                                  </small>
-                                </div>
+                              <div v-if="showPurchaseForm" class="card p-4 mt-3">
+                                <h5 class="mb-3">Complete Your Purchase</h5>
+                                <form @submit.prevent="submitPurchase">
+                                  <div class="mb-3">
+                                    <label for="paymentMethod" class="form-label">Payment Method</label>
+                                    <select v-model="purchaseForm.payment_method" id="paymentMethod" class="form-select"
+                                      required>
+                                      <option value="">Select payment method</option>
+                                      <option value="bKash">bKash</option>
+                                      <option value="Nagad">Nagad</option>
+                                      <option value="Rocket">Rocket</option>
+                                      <option value="Bank Transfer">Bank Transfer</option>
+                                    </select>
+                                  </div>
 
-                                <div class="alert alert-info">
-                                  <p class="mb-0"><strong>Amount to pay:</strong> ${{ getDiscountedPrice }}</p>
-                                  <p class="mb-0"><strong>Payment Instructions:</strong></p>
-                                  <ul class="mb-0">
-                                    <li>Make the payment to our account</li>
-                                    <li>Enter the transaction ID you received</li>
-                                    <li>Your access will be granted after admin verification</li>
-                                  </ul>
-                                </div>
+                                  <div class="mb-3">
+                                    <label for="transactionId" class="form-label">Transaction ID</label>
+                                    <input type="text" v-model="purchaseForm.transaction_id" class="form-control"
+                                      id="transactionId" placeholder="Enter your transaction ID" required>
+                                    <small class="form-text text-muted">
+                                      Please enter the transaction ID from your payment provider.
+                                    </small>
+                                  </div>
 
-                                <div class="d-grid gap-2">
-                                  <button type="submit" class="btn btn-success" :disabled="purchaseLoading">
-                                    <span v-if="purchaseLoading">
-                                      <i class="fas fa-spinner fa-spin me-2"></i>Processing...
-                                    </span>
-                                    <span v-else>Submit Purchase</span>
-                                  </button>
-                                  <button type="button" @click="showPurchaseForm = false"
-                                    class="btn btn-outline-secondary">
-                                    Cancel
-                                  </button>
-                                </div>
-                              </form>
+                                  <div class="alert alert-info">
+                                    <p class="mb-0"><strong>Amount to pay:</strong> ${{ getDiscountedPrice }}</p>
+                                    <p class="mb-0"><strong>Payment Instructions:</strong></p>
+                                    <ul class="mb-0">
+                                      <li>Make the payment to our account</li>
+                                      <li>Enter the transaction ID you received</li>
+                                      <li>Your access will be granted after admin verification</li>
+                                    </ul>
+                                  </div>
+
+                                  <div class="d-grid gap-2">
+                                    <button type="submit" class="btn btn-success" :disabled="purchaseLoading">
+                                      <span v-if="purchaseLoading">
+                                        <i class="fas fa-spinner fa-spin me-2"></i>Processing...
+                                      </span>
+                                      <span v-else>Submit Purchase</span>
+                                    </button>
+                                    <button type="button" @click="showPurchaseForm = false"
+                                      class="btn btn-outline-secondary">
+                                      Cancel
+                                    </button>
+                                  </div>
+                                </form>
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -760,8 +767,10 @@
                         <a v-else-if="purchaseStatus.purchased && purchaseStatus.order.payment_status === 'failed'"
                           @click.prevent="setActiveTab('purchase')" href="#" class="btn btn-danger mb-0 w-100">Payment
                           Failed - Try Again</a>
-                        <a v-else-if="course.price === 0" href="#" class="btn btn-dark mb-0 w-100">Enroll for
-                          Free</a>
+                        <a v-else-if="course.price === 0" @click.prevent="enrollFree" href="#" class="btn btn-dark mb-0 w-100" :disabled="enrollLoading">
+                          <span v-if="enrollLoading"><i class="fas fa-spinner fa-spin me-2"></i>Enrolling...</span>
+                          <span v-else>Enroll for Free</span>
+                        </a>
                       </div>
                     </div>
                   </div>
@@ -860,6 +869,7 @@ export default {
     })
     const youtubePlayer = ref(null)
     const videoWatchTimer = ref(null)
+    const enrollLoading = ref(false)
 
     // ==========================================
     // PROGRESS TRACKING
@@ -1169,6 +1179,37 @@ export default {
       return completedLessons.value.includes(Number(lectureId))
     }
 
+    // =========== enrollFree ==========
+    const enrollFree = async () => {
+      if (!isAuthenticated.value) {
+        alert('Please log in to enroll in this course')
+        return
+      }
+
+      try {
+        enrollLoading.value = true
+        const response = await api.post('/enroll-free', {
+          course_id: courseId
+        })
+
+        alert('Successfully enrolled in this free course!')
+
+        // Update purchase status to reflect enrollment
+        purchaseStatus.value = {
+          purchased: true,
+          order: response.data.order
+        }
+
+        // Fetch progress after successful enrollment
+        fetchProgress()
+      } catch (err) {
+        console.error('Error enrolling in free course:', err)
+        alert('Error: ' + (err.response?.data?.message || 'Failed to enroll in this course'))
+      } finally {
+        enrollLoading.value = false
+      }
+    }
+
     // ==========================================
     // WATCHERS & LIFECYCLE HOOKS
     // ==========================================
@@ -1237,7 +1278,9 @@ export default {
       fetchProgress,
       markLectureCompleted,
       isLectureCompleted,
-      setupYouTubePlayer
+      setupYouTubePlayer,
+      enrollLoading,
+      enrollFree,
     }
   }
 }
