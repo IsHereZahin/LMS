@@ -809,7 +809,7 @@
                         <span>{{ course.certificate ? 'Yes' : 'No' }}</span>
                       </li>
                       <!-- Add progress indicator -->
-                      <li class="list-group-item d-flex justify-content-between align-items-center">
+                      <li  v-if="purchaseStatus.purchased" class="list-group-item d-flex justify-content-between align-items-center">
                         <span class="h6 fw-light mb-0"><i class="fas fa-fw fa-tasks text-dark"></i>Your
                           Progress</span>
                         <div class="d-flex align-items-center">
