@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\CourseProgress;
 use App\Models\Course;
 use App\Models\Lecture;
+use App\Models\Order;
 use Illuminate\Support\Facades\DB;
 
 class CourseProgressController extends Controller
@@ -20,6 +21,20 @@ class CourseProgressController extends Controller
 
         // Get the course to verify it exists
         $course = Course::findOrFail($courseId);
+
+        // Check the user course purchase
+        $purchaseStatus = Order::where('user_id', $user->id)
+            ->where('course_id', $courseId)
+            ->where('payment_status', 'completed')
+            ->exists();
+
+        // If purchase status is not completed, return error
+        if (!$purchaseStatus) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You must complete the purchase to track progress.'
+            ], 403);
+        }
 
         // Get or create progress record
         $progress = CourseProgress::firstOrCreate(
@@ -53,6 +68,20 @@ class CourseProgressController extends Controller
     public function update(Request $request, $courseId)
     {
         $user = auth()->user();
+
+        // Check if the user has completed the course purchase
+        $purchaseStatus = Order::where('user_id', $user->id)
+            ->where('course_id', $courseId)
+            ->where('payment_status', 'completed')
+            ->exists();
+
+        // If purchase status is not completed, return error
+        if (!$purchaseStatus) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You must complete the purchase to update progress.'
+            ], 403);
+        }
 
         // Validate request
         $request->validate([

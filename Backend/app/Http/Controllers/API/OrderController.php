@@ -12,10 +12,7 @@ class OrderController extends Controller
 {
     public function index()
     {
-        // Load orders with their relationships
         $orders = Order::with(['user', 'course'])->latest()->get();
-
-        // Return in a format compatible with the Vue component
         return response()->json(['orders' => ['data' => $orders]]);
     }
 
@@ -27,22 +24,48 @@ class OrderController extends Controller
         $validated = $request->validate([
             'course_id' => 'required|exists:courses,id',
             'payment_method' => 'required|string',
-            'transaction_id' => 'required|string|unique:orders,transaction_id',
+            'transaction_id' => 'required|string', // Remove unique rule here
         ]);
 
         $course = Course::findOrFail($validated['course_id']);
-        $discountedPrice = max($course->price - $course->discount, 0); // Ensure price is not negative
+        $discountedPrice = max($course->price - $course->discount, 0);
 
-        $order = Order::create([
-            'user_id' => Auth::id(),
-            'course_id' => $course->id,
-            'amount' => $discountedPrice,
-            'payment_method' => $validated['payment_method'],
-            'transaction_id' => $validated['transaction_id'],
-            'payment_status' => 'pending',
-        ]);
+        // Check if the order already exists for the user and course
+        $order = Order::where('user_id', Auth::id())
+            ->where('course_id', $validated['course_id'])
+            ->first();
 
-        return response()->json(['message' => 'Order created successfully', 'order' => $order], 201);
+        if ($order) {
+            // If the transaction_id has changed, check uniqueness
+            if ($order->transaction_id !== $validated['transaction_id']) {
+                $existingTransaction = Order::where('transaction_id', $validated['transaction_id'])->exists();
+                if ($existingTransaction) {
+                    return response()->json(['message' => 'Transaction ID already exists.'], 422);
+                }
+            }
+
+            // Update the existing order
+            $order->update([
+                'amount' => $discountedPrice,
+                'payment_method' => $validated['payment_method'],
+                'transaction_id' => $validated['transaction_id'],
+                'payment_status' => 'pending',
+            ]);
+
+            return response()->json(['message' => 'Order updated successfully', 'order' => $order], 200);
+        } else {
+            // Create a new order
+            $order = Order::create([
+                'user_id' => Auth::id(),
+                'course_id' => $course->id,
+                'amount' => $discountedPrice,
+                'payment_method' => $validated['payment_method'],
+                'transaction_id' => $validated['transaction_id'],
+                'payment_status' => 'pending',
+            ]);
+
+            return response()->json(['message' => 'Order created successfully', 'order' => $order], 201);
+        }
     }
 
     /**
@@ -95,13 +118,21 @@ class OrderController extends Controller
     {
         $order = Order::where('user_id', Auth::id())
                     ->where('course_id', $courseId)
-                    ->where('payment_status', 'completed')
                     ->latest()
                     ->first();
 
+        if (!$order) {
+            return response()->json([
+                'purchased' => false,
+                'payment_status' => null,
+                'order' => null
+            ]);
+        }
+
         return response()->json([
-            'purchased' => (bool) $order,
-            'order' => $order ?? null
+            'purchased' => true,
+            'payment_status' => $order->payment_status, // This will be 'failed', 'pending', or 'completed'
+            'order' => $order
         ]);
     }
 }

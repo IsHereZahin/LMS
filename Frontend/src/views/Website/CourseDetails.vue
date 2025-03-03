@@ -71,7 +71,7 @@
                         class="bi bi-patch-exclamation-fill text-danger me-2"></i>Last updated {{
                           formatDate(course.updated_at) }}</li>
                     <li class="list-inline-item h6 mb-0"><i class="fas fa-globe text-info me-2"></i>{{ course.language
-                      }}</li>
+                    }}</li>
                   </ul>
                 </div>
 
@@ -124,36 +124,36 @@
                     <ul class="nav nav-pills nav-tabs-line pt-0" id="course-pills-tab" role="tablist">
                       <!-- Tab item -->
                       <li class="nav-item me-2 me-sm-4" role="presentation">
-                        <button class="nav-link mb-2 mb-md-0" :class="{ active: activeTab === 'overview' }"
+                        <button class="nav-link mb-2 mb-md-0 text-black" :class="{ active: activeTab === 'overview' }"
                           id="course-pills-tab-1" @click="setActiveTab('overview')" type="button" role="tab"
                           aria-controls="course-pills-1" aria-selected="true">Overview</button>
                       </li>
                       <!-- Tab item -->
                       <li class="nav-item me-2 me-sm-4" role="presentation">
-                        <button class="nav-link mb-2 mb-md-0" :class="{ active: activeTab === 'curriculum' }"
+                        <button class="nav-link mb-2 mb-md-0 text-black" :class="{ active: activeTab === 'curriculum' }"
                           id="course-pills-tab-2" @click="setActiveTab('curriculum')" type="button" role="tab"
                           aria-controls="course-pills-2" aria-selected="false">Curriculum</button>
                       </li>
                       <li class="nav-item me-2 me-sm-4" role="presentation">
-                        <button class="nav-link mb-2 mb-md-0" :class="{ active: activeTab === 'instructor' }"
+                        <button class="nav-link mb-2 mb-md-0 text-black" :class="{ active: activeTab === 'instructor' }"
                           id="course-pills-tab-3" @click="setActiveTab('instructor')" type="button" role="tab"
                           aria-controls="course-pills-3" aria-selected="false">Instructor</button>
                       </li>
                       <!-- Tab item -->
                       <li class="nav-item me-2 me-sm-4" role="presentation">
-                        <button class="nav-link mb-2 mb-md-0" :class="{ active: activeTab === 'reviews' }"
+                        <button class="nav-link mb-2 mb-md-0 text-black" :class="{ active: activeTab === 'reviews' }"
                           id="course-pills-tab-4" @click="setActiveTab('reviews')" type="button" role="tab"
                           aria-controls="course-pills-4" aria-selected="false">Reviews</button>
                       </li>
                       <!-- Tab item -->
                       <li class="nav-item me-2 me-sm-4" role="presentation">
-                        <button class="nav-link mb-2 mb-md-0" :class="{ active: activeTab === 'faqs' }"
+                        <button class="nav-link mb-2 mb-md-0 text-black" :class="{ active: activeTab === 'faqs' }"
                           id="course-pills-tab-5" @click="setActiveTab('faqs')" type="button" role="tab"
                           aria-controls="course-pills-5" aria-selected="false">FAQs</button>
                       </li>
                       <!-- Tab item for purchase status -->
                       <li v-if="isAuthenticated" class="nav-item me-2 me-sm-4" role="presentation">
-                        <button class="nav-link mb-2 mb-md-0" :class="{ active: activeTab === 'purchase' }"
+                        <button class="nav-link mb-2 mb-md-0 text-black" :class="{ active: activeTab === 'purchase' }"
                           id="course-pills-tab-6" @click="setActiveTab('purchase')" type="button" role="tab"
                           aria-controls="course-pills-6" aria-selected="false">Purchase Status</button>
                       </li>
@@ -586,7 +586,7 @@
                               <button class="accordion-button" :class="{ 'collapsed': !faq.isOpen }" type="button"
                                 @click="toggleFaq(index)" aria-expanded="true" :aria-controls="'faqCollapse' + index">
                                 <span class="text-secondary fw-bold me-3">{{ String(index + 1).padStart(2, '0')
-                                }}</span>
+                                  }}</span>
                                 <span class="fw-bold">{{ faq.question }}</span>
                               </button>
                             </h2>
@@ -633,7 +633,7 @@
 
                             <!-- Allow repurchase if payment failed -->
                             <div v-if="purchaseStatus.order.payment_status === 'failed'" class="mt-3">
-                              <button @click="showPurchaseForm = true" class="btn btn-primary">
+                              <button @click="showPurchaseForm = true" class="btn btn-dark">
                                 Try Purchasing Again
                               </button>
                             </div>
@@ -644,7 +644,7 @@
                             v-if="!purchaseStatus.purchased || (purchaseStatus.purchased && purchaseStatus.order.payment_status === 'failed')">
                             <!-- Purchase form -->
                             <div v-if="!showPurchaseForm && !purchaseStatus.purchased" class="text-center">
-                              <button @click="showPurchaseForm = true" class="btn btn-primary">
+                              <button @click="showPurchaseForm = true" class="btn btn-dark">
                                 Purchase Now
                               </button>
                             </div>
@@ -754,13 +754,13 @@
                         <a v-if="!purchaseStatus.purchased && course.price > 0"
                           @click.prevent="setActiveTab('purchase')" href="#" class="btn btn-success mb-0">Buy course</a>
                         <a v-else-if="purchaseStatus.purchased && purchaseStatus.order.payment_status === 'completed'"
-                          href="#" class="btn btn-primary mb-0 w-100">Access Course</a>
+                          href="#" class="btn btn-dark mb-0 w-100">Access Course</a>
                         <a v-else-if="purchaseStatus.purchased && purchaseStatus.order.payment_status === 'pending'"
                           href="#" class="btn btn-warning mb-0 w-100">Payment Pending</a>
                         <a v-else-if="purchaseStatus.purchased && purchaseStatus.order.payment_status === 'failed'"
                           @click.prevent="setActiveTab('purchase')" href="#" class="btn btn-danger mb-0 w-100">Payment
                           Failed - Try Again</a>
-                        <a v-else-if="course.price === 0" href="#" class="btn btn-primary mb-0 w-100">Enroll for
+                        <a v-else-if="course.price === 0" href="#" class="btn btn-dark mb-0 w-100">Enroll for
                           Free</a>
                       </div>
                     </div>
@@ -775,33 +775,33 @@
                       <!-- Calculate total lectures -->
                       <li class="list-group-item d-flex justify-content-between align-items-center">
                         <span class="h6 fw-light mb-0"><i
-                            class="fas fa-fw fa-book-open text-primary"></i>Lectures</span>
+                            class="fas fa-fw fa-book-open text-dark"></i>Lectures</span>
                         <span>{{ totalLectures }}</span>
                       </li>
                       <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <span class="h6 fw-light mb-0"><i class="fas fa-fw fa-clock text-primary"></i>Duration</span>
+                        <span class="h6 fw-light mb-0"><i class="fas fa-fw fa-clock text-dark"></i>Duration</span>
                         <span>{{ formatTotalDuration }}</span>
                       </li>
                       <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <span class="h6 fw-light mb-0"><i class="fas fa-fw fa-signal text-primary"></i>Level</span>
+                        <span class="h6 fw-light mb-0"><i class="fas fa-fw fa-signal text-dark"></i>Level</span>
                         <span>{{ course.level }}</span>
                       </li>
                       <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <span class="h6 fw-light mb-0"><i class="fas fa-fw fa-globe text-primary"></i>Language</span>
+                        <span class="h6 fw-light mb-0"><i class="fas fa-fw fa-globe text-dark"></i>Language</span>
                         <span>{{ course.language }}</span>
                       </li>
                       <li class="list-group-item d-flex justify-content-between align-items-center">
                         <span class="h6 fw-light mb-0"><i
-                            class="fas fa-fw fa-user-clock text-primary"></i>Created</span>
+                            class="fas fa-fw fa-user-clock text-dark"></i>Created</span>
                         <span>{{ formatDate(course.created_at) }}</span>
                       </li>
                       <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <span class="h6 fw-light mb-0"><i class="fas fa-fw fa-medal text-primary"></i>Certificate</span>
+                        <span class="h6 fw-light mb-0"><i class="fas fa-fw fa-medal text-dark"></i>Certificate</span>
                         <span>{{ course.certificate ? 'Yes' : 'No' }}</span>
                       </li>
                       <!-- Add progress indicator -->
                       <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <span class="h6 fw-light mb-0"><i class="fas fa-fw fa-tasks text-primary"></i>Your
+                        <span class="h6 fw-light mb-0"><i class="fas fa-fw fa-tasks text-dark"></i>Your
                           Progress</span>
                         <div class="d-flex align-items-center">
                           <span class="me-2">{{ progress.progress_percentage }}%</span>
@@ -832,14 +832,15 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import api from '@/api'
-import useCourseProgress from '@/useCourseProgress'
 
 export default {
   setup() {
     const route = useRoute()
     const courseId = route.params.id
 
-    // Data states
+    // ==========================================
+    // STATE MANAGEMENT
+    // ==========================================
     const course = ref({})
     const sections = ref([])
     const faqs = ref([])
@@ -850,7 +851,7 @@ export default {
     const currentLectureId = ref(null)
     const isCurrentVideoPremium = ref(false)
     const isAuthenticated = ref(false)
-    const purchaseStatus = ref({ purchased: false, order: null })
+    const purchaseStatus = ref({ purchased: false, payment_status: null, order: null })
     const showPurchaseForm = ref(false)
     const purchaseLoading = ref(false)
     const purchaseForm = ref({
@@ -860,42 +861,49 @@ export default {
     const youtubePlayer = ref(null)
     const videoWatchTimer = ref(null)
 
-    // Initialize course progress tracking
-    const {
-      progress,
-      isLoading: progressLoading,
-      fetchProgress,
-      markLectureCompleted,
-      isLectureCompleted
-    } = useCourseProgress(courseId)
+    // ==========================================
+    // PROGRESS TRACKING
+    // ==========================================
+    const progress = ref({
+      completed_lessons: "[]",
+      progress_percentage: "0",
+    })
+    const progressLoading = ref(false)
+    const progressError = ref(null)
 
-    // Check user authentication
+    const completedLessons = computed(() => {
+      try {
+        return JSON.parse(progress.value.completed_lessons || "[]")
+      } catch (e) {
+        console.error("Error parsing completed lessons:", e)
+        return []
+      }
+    })
+
+    // ==========================================
+    // AUTHENTICATION & DATA FETCHING
+    // ==========================================
     const checkAuth = () => {
       const token = localStorage.getItem('token')
       isAuthenticated.value = !!token
     }
 
-    // Fetch course data
     const fetchCourse = async () => {
       try {
         loading.value = true
         const response = await api.get(`/course/${courseId}`)
 
-        // Correctly access nested data
         course.value = response.data.data
 
-        // Transform sections from data.data.sections
         sections.value = response.data.data.sections.map(section => ({
           ...section,
           isOpen: false
         }))
 
-        // Set first section to open always
         if (sections.value.length > 0) {
           sections.value[0].isOpen = true
         }
 
-        // Transform FAQs from data.data.faqs
         faqs.value = response.data.data.faqs.map((faq, index) => ({
           ...faq,
           isOpen: index === 0
@@ -903,10 +911,8 @@ export default {
 
         loading.value = false
 
-        // Check purchase status is authenticated
         if (isAuthenticated.value) {
           checkPurchaseStatus()
-          fetchProgress()
         }
       } catch (err) {
         console.error('Error fetching course:', err)
@@ -915,22 +921,33 @@ export default {
       }
     }
 
-    // Check purchased course
+    // ==========================================
+    // PURCHASE HANDLING
+    // ==========================================
     const checkPurchaseStatus = async () => {
       if (!isAuthenticated.value) return
 
       try {
         const response = await api.get(`/check-purchase/${courseId}`)
         purchaseStatus.value = response.data
+        console.log('Purchase status:', purchaseStatus.value)
+
+        if (canAccessPremiumContent.value) {
+          fetchProgress()
+        }
       } catch (err) {
         console.error('Error checking purchase status:', err)
       }
     }
 
-    // Submit purchase
     const submitPurchase = async () => {
       if (!isAuthenticated.value) {
         alert('Please log in to purchase this course')
+        return
+      }
+
+      if (!purchaseForm.value.transaction_id) {
+        alert('Transaction ID is required')
         return
       }
 
@@ -944,44 +961,43 @@ export default {
 
         alert('Your purchase has been submitted and is pending approval')
         showPurchaseForm.value = false
+
+        // Clear transaction_id after a successful purchase
         purchaseForm.value = { payment_method: '', transaction_id: '' }
 
-        // Refresh purchase status
         await checkPurchaseStatus()
-
-        purchaseLoading.value = false
       } catch (err) {
         console.error('Error submitting purchase:', err)
         alert('Error: ' + (err.response?.data?.message || 'Failed to submit purchase'))
+      } finally {
         purchaseLoading.value = false
       }
     }
 
-    // Setup YouTube player API
+    // ==========================================
+    // VIDEO PLAYER & TRACKING
+    // ==========================================
     const setupYouTubePlayer = () => {
-      // This function will be called when the iframe is loaded
-      // I'll use a simple approach with a timer instead of the full YouTube API integration
       if (videoWatchTimer.value) {
         clearTimeout(videoWatchTimer.value)
       }
 
-      // If there's a video playing and the user is authenticated
-      if (currentVideo.value && currentLectureId.value && isAuthenticated.value) {
-        // Set a timer to mark the video as completed after a certain time (e.g., 30 seconds)
+      if (currentVideo.value && currentLectureId.value && isAuthenticated.value && canAccessPremiumContent.value) {
         videoWatchTimer.value = setTimeout(() => {
           markLectureCompleted(currentLectureId.value)
-        }, 30000) // Mark as completed after 30 seconds of watching
+        }, 30000)
       }
     }
 
-    // Total lectures count
+    // ==========================================
+    // COURSE STATISTICS & FORMATTING
+    // ==========================================
     const totalLectures = computed(() => {
       return sections.value.reduce((total, section) => {
         return total + section.lectures.length
       }, 0)
     })
 
-    // Calculate total duration from all lectures
     const calculateTotalDuration = computed(() => {
       let totalMinutes = 0;
       sections.value.forEach(section => {
@@ -992,7 +1008,6 @@ export default {
       return totalMinutes;
     });
 
-    // Format total duration
     const formatTotalDuration = computed(() => {
       const totalMinutes = calculateTotalDuration.value;
       const hours = Math.floor(totalMinutes / 60)
@@ -1004,7 +1019,6 @@ export default {
       return `${minutes}m`
     })
 
-    // Format lecture duration
     const formatDuration = (minutes) => {
       const hrs = Math.floor(minutes / 60)
       const mins = minutes % 60
@@ -1015,7 +1029,6 @@ export default {
       return `${mins}m`
     }
 
-    // Format date
     const formatDate = (dateString) => {
       if (!dateString) return 'Unknown'
       const date = new Date(dateString)
@@ -1023,12 +1036,13 @@ export default {
       return date.toLocaleDateString('en-US', options)
     }
 
-    // Toggle curriculum section
+    // ==========================================
+    // UI INTERACTIONS
+    // ==========================================
     const toggleSection = (index) => {
       sections.value[index].isOpen = !sections.value[index].isOpen
     }
 
-    // Toggle FAQ
     const toggleFaq = (index) => {
       faqs.value = faqs.value.map((faq, i) => ({
         ...faq,
@@ -1036,13 +1050,11 @@ export default {
       }))
     }
 
-    // Get thumbnail URL
     const getThumbnailUrl = (path) => {
       if (!path) return ''
       return `${api.defaults.baseURL.replace('/api', '')}/storage/${path}`
     }
 
-    // Play video
     const playVideo = (youtubeVideoId, isPremium, lectureId) => {
       if (!youtubeVideoId) {
         alert('This lecture has no video available.')
@@ -1053,13 +1065,11 @@ export default {
       currentLectureId.value = lectureId
       isCurrentVideoPremium.value = isPremium
 
-      // If premium content and user hasn't purchased
       if (isPremium && !canAccessPremiumContent.value) {
         setActiveTab('purchase')
       }
     }
 
-    // Download note
     const downloadNote = (note) => {
       if (note.is_premium && !canAccessPremiumContent.value) {
         alert('This is a premium note. Please purchase the course to access it.')
@@ -1070,18 +1080,20 @@ export default {
       window.open(`${api.defaults.baseURL.replace('/api', '')}/storage/${note.file}`, '_blank')
     }
 
-    // Check user can access premium content
+    // ==========================================
+    // ACCESS & PRICING CALCULATIONS
+    // ==========================================
     const canAccessPremiumContent = computed(() => {
-      return purchaseStatus.value.purchased && purchaseStatus.value.order.payment_status === 'completed'
+      return purchaseStatus.value.purchased &&
+        purchaseStatus.value.order &&
+        purchaseStatus.value.order.payment_status === 'completed'
     })
 
-    // Check if discount is valid
     const hasValidDiscount = computed(() => {
       return course.value.discount > 0 &&
         (!course.value.discount_ends_at || new Date(course.value.discount_ends_at) > new Date())
     })
 
-    // Calculate discounted price
     const getDiscountedPrice = computed(() => {
       if (hasValidDiscount.value) {
         return (parseFloat(course.value.price) - parseFloat(course.value.discount)).toFixed(2)
@@ -1089,7 +1101,6 @@ export default {
       return parseFloat(course.value.price).toFixed(2)
     })
 
-    // Calculate discount percentage
     const calculateDiscountPercentage = computed(() => {
       if (hasValidDiscount.value && parseFloat(course.value.price) > 0) {
         return Math.round((parseFloat(course.value.discount) / parseFloat(course.value.price)) * 100)
@@ -1097,7 +1108,6 @@ export default {
       return 0
     })
 
-    // Calculate days left for discount
     const daysLeft = computed(() => {
       if (!course.value.discount_ends_at) return 0
 
@@ -1109,33 +1119,85 @@ export default {
       return diffDays > 0 ? diffDays : 0
     })
 
-    // Set active tab
     const setActiveTab = (tab) => {
       activeTab.value = tab
     }
 
-    // Watch for video changes to track progress
+    // ==========================================
+    // PROGRESS MANAGEMENT
+    // ==========================================
+    const fetchProgress = async () => {
+      if (!courseId || !canAccessPremiumContent.value) return
+
+      try {
+        progressLoading.value = true
+        const response = await api.get(`/course-progress/show/${courseId}`)
+
+        if (response.data.success) {
+          progress.value = response.data.data.progress
+        }
+      } catch (err) {
+        console.error("Error fetching course progress:", err)
+        progressError.value = "Failed to load your progress"
+      } finally {
+        progressLoading.value = false
+      }
+    }
+
+    const markLectureCompleted = async (lectureId) => {
+      if (!courseId || !lectureId || !canAccessPremiumContent.value) return
+
+      try {
+        progressLoading.value = true
+        const response = await api.post(`/course-progress/update/${courseId}`, {
+          lecture_id: lectureId,
+          completed: true,
+        })
+
+        if (response.data.success) {
+          progress.value = response.data.data.progress
+        }
+      } catch (err) {
+        console.error("Error updating course progress:", err)
+        progressError.value = "Failed to update your progress"
+      } finally {
+        progressLoading.value = false
+      }
+    }
+
+    const isLectureCompleted = (lectureId) => {
+      return completedLessons.value.includes(Number(lectureId))
+    }
+
+    // ==========================================
+    // WATCHERS & LIFECYCLE HOOKS
+    // ==========================================
     watch(currentVideo, (newValue, oldValue) => {
-      // Clear any existing timer
       if (videoWatchTimer.value) {
         clearTimeout(videoWatchTimer.value)
       }
 
-      // check new video and the user is authenticated
-      if (newValue && currentLectureId.value && isAuthenticated.value) {
-        // Set a timer to mark the video as completed after a certain time
+      if (newValue && currentLectureId.value && isAuthenticated.value && canAccessPremiumContent.value) {
         videoWatchTimer.value = setTimeout(() => {
           markLectureCompleted(currentLectureId.value)
-        }, 30000) // Mark as completed after 30 seconds of watching
+        }, 30000)
       }
     })
 
-    // Fetch course on component mount
+    watch(() => purchaseStatus.value.order?.payment_status, (newStatus, oldStatus) => {
+      if (newStatus === 'completed' && canAccessPremiumContent.value) {
+        fetchProgress()
+      }
+    })
+
     onMounted(() => {
       checkAuth()
       fetchCourse()
     })
 
+    // ==========================================
+    // COMPONENT EXPORTS
+    // ==========================================
     return {
       course,
       sections,
@@ -1169,6 +1231,11 @@ export default {
       submitPurchase,
       setActiveTab,
       progress,
+      progressLoading,
+      progressError,
+      completedLessons,
+      fetchProgress,
+      markLectureCompleted,
       isLectureCompleted,
       setupYouTubePlayer
     }
@@ -1200,14 +1267,10 @@ export default {
 }
 
 /* Tab styling */
-.accordion-button:not(.collapsed) {
-  background-color: rgba(var(--bs-primary-rgb), 0.1);
-  color: var(--bs-primary);
-}
-
 .nav-tabs-line .nav-link.active {
-  border-bottom: 3px solid var(--bs-primary);
-  color: var(--bs-primary);
+  background-color: #000;
+  border: 1px solid var(--bs-dark);
+  color: var(--bs-dark);
 }
 
 /* Loading spinner */
