@@ -132,6 +132,7 @@ export default {
       this.errorMessage = '';
 
       try {
+        // Send login request to the server
         const response = await api.post('/login', {
           email: this.email,
           password: this.password,
@@ -139,11 +140,15 @@ export default {
 
         const { token, user } = response.data;
 
+        // Store the token and role in localStorage
         localStorage.setItem('token', token);
         localStorage.setItem('role', user.role);
 
         this.$router.push(user.role === 'admin' ? '/admin-dashboard' : '/dashboard');
       } catch (error) {
+        // If login fails, remove the token and show error
+        localStorage.removeItem('token');
+        localStorage.removeItem('role');
         this.errorMessage = 'Invalid credentials';
       } finally {
         this.loading = false;

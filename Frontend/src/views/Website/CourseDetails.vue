@@ -124,38 +124,38 @@
                     <ul class="nav nav-pills nav-tabs-line pt-0" id="course-pills-tab" role="tablist">
                       <!-- Tab item -->
                       <li class="nav-item me-2 me-sm-4" role="presentation">
-                        <button class="nav-link mb-2 mb-md-0 text-black" :class="{ active: activeTab === 'overview' }"
+                        <button class="nav-link mb-2 text-black" :class="{ active: activeTab === 'overview' }"
                           id="course-pills-tab-1" @click="setActiveTab('overview')" type="button" role="tab"
                           aria-controls="course-pills-1" aria-selected="true">Overview</button>
                       </li>
                       <!-- Tab item -->
                       <li class="nav-item me-2 me-sm-4" role="presentation">
-                        <button class="nav-link mb-2 mb-md-0 text-black" :class="{ active: activeTab === 'curriculum' }"
+                        <button class="nav-link mb-2 text-black" :class="{ active: activeTab === 'curriculum' }"
                           id="course-pills-tab-2" @click="setActiveTab('curriculum')" type="button" role="tab"
                           aria-controls="course-pills-2" aria-selected="false">Curriculum</button>
                       </li>
                       <li class="nav-item me-2 me-sm-4" role="presentation">
-                        <button class="nav-link mb-2 mb-md-0 text-black" :class="{ active: activeTab === 'instructor' }"
+                        <button class="nav-link mb-2 text-black" :class="{ active: activeTab === 'instructor' }"
                           id="course-pills-tab-3" @click="setActiveTab('instructor')" type="button" role="tab"
                           aria-controls="course-pills-3" aria-selected="false">Instructor</button>
                       </li>
                       <!-- Tab item -->
                       <li class="nav-item me-2 me-sm-4" role="presentation">
-                        <button class="nav-link mb-2 mb-md-0 text-black" :class="{ active: activeTab === 'reviews' }"
+                        <button class="nav-link mb-2 text-black" :class="{ active: activeTab === 'reviews' }"
                           id="course-pills-tab-4" @click="setActiveTab('reviews')" type="button" role="tab"
                           aria-controls="course-pills-4" aria-selected="false">Reviews</button>
                       </li>
                       <!-- Tab item -->
                       <li class="nav-item me-2 me-sm-4" role="presentation">
-                        <button class="nav-link mb-2 mb-md-0 text-black" :class="{ active: activeTab === 'faqs' }"
+                        <button class="nav-link mb-2 text-black" :class="{ active: activeTab === 'faqs' }"
                           id="course-pills-tab-5" @click="setActiveTab('faqs')" type="button" role="tab"
                           aria-controls="course-pills-5" aria-selected="false">FAQs</button>
                       </li>
                       <!-- Tab item for purchase status -->
                       <li v-if="isAuthenticated" class="nav-item me-2 me-sm-4" role="presentation">
-                        <button class="nav-link mb-2 mb-md-0 text-black" :class="{ active: activeTab === 'purchase' }"
+                        <button class="nav-link mb-2 text-black" :class="{ active: activeTab === 'purchase' }"
                           id="course-pills-tab-6" @click="setActiveTab('purchase')" type="button" role="tab"
-                          aria-controls="course-pills-6" aria-selected="false">Purchase Status</button>
+                          aria-controls="course-pills-6" aria-selected="false">Purchase</button>
                       </li>
                     </ul>
                     <hr>

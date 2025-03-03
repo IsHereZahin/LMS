@@ -114,13 +114,20 @@ export default {
   methods: {
     async register() {
       try {
-        await api.post('/register', {
+        // Send the registration request
+        const response = await api.post('/register', {
           name: this.name,
           username: this.username,
           email: this.email,
           password: this.password,
         });
-        this.$router.push('/');
+
+        const { token, user } = response.data;
+
+        // Store the token and role in localStorage
+        localStorage.setItem('token', token);
+        localStorage.setItem('role', user.role);
+        this.$router.push(user.role === 'admin' ? '/admin-dashboard' : '/dashboard');
       } catch (error) {
         alert('Registration failed');
       }

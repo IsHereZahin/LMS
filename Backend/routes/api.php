@@ -25,6 +25,11 @@ use App\Http\Controllers\API\CourseProgressController;
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
+// Course routes
+Route::get('get-courses', [CourseController::class, 'index']);
+Route::get('/course/{id}', [CourseController::class, 'show']);
+
+// Auth routes
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/user', function (Request $request) {
@@ -38,9 +43,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/course-progress/show/{courseId}', [CourseProgressController::class, 'show']);
     Route::post('/course-progress/update/{courseId}', [CourseProgressController::class, 'update']);
 });
-
-// Course routes
-Route::get('/course/{id}', [CourseController::class, 'show']);
 
 // Admin Middleware Group
 Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {

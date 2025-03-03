@@ -96,25 +96,25 @@ const router = createRouter({
 
 // Navigation Guard
 router.beforeEach((to, from, next) => {
-  const loggedIn = localStorage.getItem("token")
-  const role = localStorage.getItem("role")
+  const loggedIn = localStorage.getItem("token");
+  const role = localStorage.getItem("role");
 
-  // logged-in users can not access login and register pages
+  // logged-in users cannot access login and register pages
   if (loggedIn && (to.path === "/login" || to.path === "/register")) {
-    next(role === "admin" ? "/admin-dashboard" : "/dashboard")
+    next(role === "admin" ? "/admin-dashboard" : "/dashboard");
   }
   // Restrict access based on user role
   else if (to.path.startsWith("/admin-dashboard") && role !== "admin") {
-    next("/dashboard")
+    next("/dashboard");
   } else if (to.path.startsWith("/dashboard") && role !== "student") {
-    next("/admin-dashboard")
+    next("/admin-dashboard");
   }
   // Protect all authenticated routes
   else if (to.matched.some((record) => record.meta.requiresAuth) && !loggedIn) {
-    next("/login")
+    next("/login");
   } else {
-    next()
+    next();
   }
-})
+});
 
 export default router
